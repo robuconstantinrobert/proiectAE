@@ -40,5 +40,5 @@ def delete_order(order_id):
     return jsonify({"message": "Order deleted"}), 200
 
 
-def order():
+def order_method():
     return None
