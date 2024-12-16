@@ -1,16 +1,21 @@
-# This is a sample Python script.
+from flask import Flask
+from flask_jwt_extended import JWTManager
+from database import init_db
+from Routes.auth import auth
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+app = Flask(__name__)
 
+# Configurare aplicație
+app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://user:password@localhost/ecommerce_db"
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["JWT_SECRET_KEY"] = "your_secret_key"
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+# Inițializare baze de date și JWT
+init_db(app)
+jwt = JWTManager(app)
 
-#Initial commit test
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
+# Înregistrare rute
+app.register_blueprint(auth, url_prefix="/auth")
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+if __name__ == "__main__":
+    app.run(debug=True)
