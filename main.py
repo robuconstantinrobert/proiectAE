@@ -7,13 +7,13 @@ from Routes.order import orders
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:3000"])
+CORS(app, origins=["http://localhost:3000"], allow_headers=["Authorization", "Content-Type"])
 
 
 # Configurare aplicație
 app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:Robert44!!@localhost/ecommerce_db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["JWT_SECRET_KEY"] = "your_secret_key"
+app.config["JWT_SECRET_KEY"] = "your-secret-key"
 
 # Inițializare baze de date și JWT
 init_db(app)

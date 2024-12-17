@@ -2,14 +2,16 @@ from flask import Blueprint, request, jsonify
 from Models.product import Product
 from database import db
 from flask_jwt_extended import jwt_required
-import os
 from werkzeug.utils import secure_filename
+from flask_cors import cross_origin
+
 products = Blueprint("products", __name__)
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 UPLOAD_FOLDER = 'uploads/products'
 
 @products.route("/", methods=["GET"])
+@cross_origin(origins=["http://localhost:3000"])
 @jwt_required()
 def get_products():
     all_products = Product.query.all()
@@ -29,6 +31,7 @@ def create_product():
     data = request.form  # This will capture 'name', 'price', 'stock'
     files = request.files.getlist("images")  # Multiple files
 
+
     if not data.get("name") or not data.get("price") or not data.get("stock"):
         return jsonify({"message": "All fields (name, price, stock) are required"}), 400
 
@@ -42,7 +45,7 @@ def create_product():
     except ValueError:
         return jsonify({"message": "Price and stock must be numbers"}), 400
 
-    # Save images as binary data
+    # Save images
     image_data = []
     for file in files:
         if file and allowed_file(file.filename):
@@ -59,6 +62,7 @@ def create_product():
     db.session.add(new_product)
     db.session.commit()
     return jsonify({"message": "Product created", "product_id": new_product.id}), 201
+
 
 
 @products.route("/<int:product_id>", methods=["PUT"])
