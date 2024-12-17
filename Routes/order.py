@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from Models.order import Order
 from Models.product import Product
-from Models.user import User
+from Models.orderItem import OrderItem
 from database import db
 
 orders = Blueprint("orders", __name__)
@@ -19,25 +19,39 @@ def get_orders():
 def create_order():
     data = request.json
     user_id = data["user_id"]
-    product_ids = data["product_ids"]
+    product_items = data["products"]  # List of products with quantity
 
-    # Calcul total price
+    # Calculate total price
     total_price = 0
-    for product_id in product_ids:
-        product = Product.query.get_or_404(product_id)
-        total_price += product.price
+    order_items = []
+    for item in product_items:
+        product = Product.query.get_or_404(item["product_id"])
+        total_price += product.price * item["quantity"]
+        order_items.append(OrderItem(product_id=item["product_id"], quantity=item["quantity"]))
 
-    new_order = Order(user_id=user_id, total_price=total_price)
+        if product.stock < item["quantity"]:
+            return jsonify({"message": f"Not enough stock for {product.name}"}), 400
+        product.stock -= item["quantity"]
+
+    new_order = Order(user_id=user_id, total_price=total_price, products=order_items)
     db.session.add(new_order)
     db.session.commit()
     return jsonify({"message": "Order created"}), 201
 
+
 @orders.route("/<int:order_id>", methods=["DELETE"])
 def delete_order(order_id):
     order = Order.query.get_or_404(order_id)
+
+    # Restore stock for products in the order
+    for item in order.products:
+        product = Product.query.get_or_404(item.product_id)
+        product.stock += item.quantity
+
     db.session.delete(order)
     db.session.commit()
     return jsonify({"message": "Order deleted"}), 200
+
 
 
 def order_method():

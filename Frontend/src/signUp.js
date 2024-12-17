@@ -1,29 +1,29 @@
-import React, { useEffect, useState } from "react";
-import axios from 'axios';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
-const SignUp = () => {
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [message, setMessage] = useState('');
+const SignUp = ({ onLogin }) => {
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [message, setMessage] = useState("");
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         try {
-            const response = await axios.post('http://localhost:5000/register', {
+            const response = await axios.post("http://localhost:5000/auth/register", {
                 name,
                 email,
-                password
+                password,
             });
-            setMessage(response.data.message);
+            onLogin(response.data.access_token); // Update token
         } catch (error) {
-            setMessage('Error: ' + error.response.data.message);
+            setMessage("Error: " + error.response?.data.message || "Something went wrong.");
         }
     };
 
     return (
-        <div>
+        <div className="auth-container">
             <h2>Sign Up</h2>
             <form onSubmit={handleSubmit}>
                 <div>

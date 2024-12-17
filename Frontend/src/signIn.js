@@ -1,29 +1,27 @@
-import React, { useEffect, useState } from "react";
-import axios from 'axios';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
-const SignIn = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [message, setMessage] = useState('');
-    const [token, setToken] = useState('');
+const SignIn = ({ onLogin }) => {
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [message, setMessage] = useState("");
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         try {
-            const response = await axios.post('http://localhost:5000/login', {
+            const response = await axios.post("http://localhost:5000/auth/login", {
                 email,
-                password
+                password,
             });
-            setToken(response.data.access_token);
-            setMessage('Login successful!');
+            onLogin(response.data.access_token); // Update token
         } catch (error) {
-            setMessage('Error: ' + error.response.data.message);
+            setMessage("Error: " + error.response?.data.message || "Invalid credentials.");
         }
     };
 
     return (
-        <div>
+        <div className="auth-container">
             <h2>Sign In</h2>
             <form onSubmit={handleSubmit}>
                 <div>
@@ -37,7 +35,6 @@ const SignIn = () => {
                 <button type="submit">Login</button>
             </form>
             {message && <p>{message}</p>}
-            {token && <p>JWT Token: {token}</p>}
         </div>
     );
 };
