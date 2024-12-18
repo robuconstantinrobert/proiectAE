@@ -39,6 +39,7 @@ def create_order():
     return jsonify({"message": "Order created"}), 201
 
 
+
 @orders.route("/<int:order_id>", methods=["DELETE"])
 def delete_order(order_id):
     order = Order.query.get_or_404(order_id)

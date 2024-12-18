@@ -29,7 +29,7 @@ const SellProduct = () => {
             await axios.post("http://localhost:5000/products", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
-                    "Authorization": `Bearer ${token}`, // Add Authorization header
+                    //"Authorization": `Bearer ${token}`, // Add Authorization header
                 },
             });
             setMessage("Product added successfully!");

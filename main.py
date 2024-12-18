@@ -5,6 +5,7 @@ from Routes.auth import auth
 from Routes.product import products
 from Routes.order import orders
 from flask_cors import CORS
+from Routes.shipping import shipping_bp
 
 app = Flask(__name__)
 CORS(app, origins=["http://localhost:3000"], allow_headers=["Authorization", "Content-Type"])
@@ -23,6 +24,7 @@ jwt = JWTManager(app)
 app.register_blueprint(auth, url_prefix="/auth")
 app.register_blueprint(products, url_prefix="/products")
 app.register_blueprint(orders, url_prefix="/orders")
+app.register_blueprint(shipping_bp, url_prefix="/api/shipping")
 
 
 if __name__ == "__main__":

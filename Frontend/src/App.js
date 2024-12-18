@@ -1,77 +1,22 @@
-//import React, { useState, useEffect } from "react";
-//import "./App.css";
-//import SignIn from "./signIn";
-//import SignUp from "./signUp";
-//import ProductList from "./Components/ProductList";
-//import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-//
-//const App = () => {
-//    const [token, setToken] = useState(localStorage.getItem("token") || "");
-//
-//    // Update token in localStorage and state
-//    const handleLogin = (newToken) => {
-//        localStorage.setItem("token", newToken);
-//        setToken(newToken);
-//    };
-//
-//    const handleLogout = () => {
-//        localStorage.removeItem("token");
-//        setToken("");
-//    };
-//
-//    return (
-//        <Router>
-//            <div className="App">
-//                <header className="App-header">
-//                    <h1>Authentication</h1>
-//                    <nav className="App-nav">
-//                        {token ? (
-//                            <button onClick={handleLogout}>Log Out</button>
-//                        ) : (
-//                            <>
-//                                <button onClick={() => setToken("signin")}>Sign In</button>
-//                                <button onClick={() => setToken("signup")}>Sign Up</button>
-//                            </>
-//                        )}
-//                    </nav>
-//                </header>
-//
-//                <main className="App-main">
-//                    <Routes>
-//                        <Route
-//                            path="/"
-//                            element={
-//                                token ? (
-//                                    <Navigate to="/home" />
-//                                ) : (
-//                                    <SignIn onLogin={handleLogin} />
-//                                )
-//                            }
-//                        />
-//                        <Route path="/signup" element={<SignUp onLogin={handleLogin} />} />
-//                        <Route
-//                            path="/home"
-//                            element={token ? <ProductList /> : <Navigate to="/" />}
-//                        />
-//                    </Routes>
-//                </main>
-//            </div>
-//        </Router>
-//    );
-//};
-//
-//export default App;
-
 import React, { useState, useEffect } from "react";
 import "./App.css";
 import SignIn from "./signIn";
 import SignUp from "./signUp";
 import ProductList from "./Components/ProductList";
 import SellProduct from "./SellProduct"; // Import the SellProduct component
+import Cart from "./Cart"; // Import the Cart component
+import Shipping from "./Shipping";
 import { BrowserRouter as Router, Routes, Route, Navigate, Link } from "react-router-dom";
 
 const App = () => {
     const [token, setToken] = useState(localStorage.getItem("token") || "");
+    const [cart, setCart] = useState([]); // Cart state
+
+    // Sync cart state with localStorage on initial load
+    useEffect(() => {
+        const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
+        setCart(storedCart);
+    }, []);
 
     // Update token in localStorage and state
     const handleLogin = (newToken) => {
@@ -92,6 +37,7 @@ const App = () => {
                     <nav className="App-nav">
                         <Link to="/">Home</Link>
                         {token && <Link to="/sell">Sell Product</Link>}
+                        <Link to="/cart">Cart ({cart.length})</Link> {/* Cart link with dynamic count */}
                         {token ? (
                             <button onClick={handleLogout}>Log Out</button>
                         ) : (
@@ -123,13 +69,25 @@ const App = () => {
                         {/* Home Page */}
                         <Route
                             path="/home"
-                            element={token ? <ProductList /> : <Navigate to="/" />}
+                            element={token ? <ProductList setCart={setCart} /> : <Navigate to="/" />}
                         />
 
                         {/* Sell Product Page */}
                         <Route
                             path="/sell"
                             element={token ? <SellProduct /> : <Navigate to="/" />}
+                        />
+
+                        {/* Cart Page */}
+                        <Route
+                            path="/cart"
+                            element={token ? <Cart cart={cart} setCart={setCart} /> : <Navigate to="/" />}
+                        />
+
+                        {/* Shipping Page */}
+                        <Route
+                            path="/shipping"
+                            element={token ? <Shipping cart={cart} /> : <Navigate to="/" />}
                         />
 
                         {/* Redirect to home for unknown routes */}

@@ -7,7 +7,7 @@ class Product(db.Model):
     name = db.Column(db.String(100), nullable=False)
     price = db.Column(db.Float, nullable=False)
     stock = db.Column(db.Integer, nullable=False)
-    images = db.Column(LargeBinary, nullable=True)
 
     # Relationships
     order_items = db.relationship('OrderItem', back_populates='product')
+    images = db.relationship("ProductImage", back_populates="product", cascade="all, delete-orphan")

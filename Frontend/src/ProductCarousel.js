@@ -1,5 +1,6 @@
 import React from "react";
 import Slider from "react-slick";  // Install react-slick and slick-carousel
+import "./CarouselStyling.css"
 
 const ProductCarousel = ({ images }) => {
     const settings = {

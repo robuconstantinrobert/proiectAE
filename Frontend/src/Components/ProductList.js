@@ -1,71 +1,81 @@
 //import React, { useEffect, useState } from "react";
-//import { getProducts, createProduct } from "../api"; // Function to fetch and create products from API
-//import Slider from "react-slick"; // For the image carousel
-//import "./ProductList.css"; // Add custom styles for the page
+//import { getProducts, updateProductStock } from "../api"; // Assuming you have an API to update stock
+//import { useNavigate } from "react-router-dom"; // for navigation
 //import "slick-carousel/slick/slick.css";
 //import "slick-carousel/slick/slick-theme.css";
-//
+//import "./ProductList.css";
 //
 //const ProductList = () => {
 //    const [products, setProducts] = useState([]);
 //    const [searchQuery, setSearchQuery] = useState("");
-//    const [newProduct, setNewProduct] = useState({ name: "", price: "", stock: "", images: [] });
-//    const [message, setMessage] = useState("");
-//    const token = localStorage.getItem("token");
+//    const [cart, setCart] = useState([]); // State for cart
+//    const history = useNavigate(); // For navigation to cart page
 //
+//    // Fetch products and cart content
 //    useEffect(() => {
 //        const fetchProducts = async () => {
-//            const data = await getProducts(); // Fetch products from API
-//            setProducts(data);
+//            try {
+//                const data = await getProducts();
+//                setProducts(data);
+//            } catch (error) {
+//                console.error("Error fetching products:", error);
+//            }
 //        };
+//
+//        // Load cart content from localStorage
+//        const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
+//        setCart(storedCart);
+//
 //        fetchProducts();
 //    }, []);
 //
-//    // Handle creating a new product
-//    const handleCreateProduct = async (e) => {
-//        e.preventDefault();
-//
-//        const formData = new FormData();
-//        formData.append("name", newProduct.name);
-//        formData.append("price", newProduct.price);
-//        formData.append("stock", newProduct.stock);
-//
-//        // Append images to FormData
-//        for (let i = 0; i < newProduct.images.length; i++) {
-//            formData.append("images", newProduct.images[i]);
-//        }
-//
-//        try {
-//            await createProduct(formData);
-//            setMessage("Product created successfully!");
-//            setNewProduct({ name: "", price: "", stock: "", images: [] });
-//        } catch (error) {
-//            setMessage("Error creating product.");
-//        }
-//    };
-//
-//    // Handle file input change
-//    const handleFileChange = (e) => {
-//        setNewProduct({ ...newProduct, images: e.target.files });
-//    };
-//
-//    // Filter products based on the search query
 //    const filteredProducts = products.filter((product) =>
 //        product.name.toLowerCase().includes(searchQuery.toLowerCase())
 //    );
 //
-//    // Carousel settings
-//    const carouselSettings = {
-//        dots: true,
-//        infinite: true,
-//        speed: 500,
-//        slidesToShow: 1,
-//        slidesToScroll: 1,
+//    const handleBuyClick = async (productId) => {
+//        // Find the product that was clicked
+//        const productToAdd = products.find((product) => product.id === productId);
+//
+//        // Check if stock is available
+//        if (productToAdd.stock > 0) {
+//            // Decrease the stock locally
+//            const updatedProduct = { ...productToAdd, stock: productToAdd.stock - 1 };
+//
+//            // Update the product in the state
+//            const updatedProducts = products.map((product) =>
+//                product.id === productId ? updatedProduct : product
+//            );
+//            setProducts(updatedProducts);
+//
+//            // Update the stock in the backend (make sure to implement this API)
+//            try {
+//                await updateProductStock(productId, updatedProduct.stock); // Assuming this API exists
+//            } catch (error) {
+//                console.error("Error updating stock:", error);
+//            }
+//
+//            // Add the product to the cart
+//            const cartFromStorage = JSON.parse(localStorage.getItem("cart")) || [];
+//            cartFromStorage.push(productToAdd);
+//            localStorage.setItem("cart", JSON.stringify(cartFromStorage));
+//            setCart(cartFromStorage); // Update the cart state
+//        } else {
+//            alert("Sorry, this product is out of stock.");
+//        }
+//    };
+//
+//    const handleGoToCart = () => {
+//        history.push("/cart"); // Navigate to the cart page
+//    };
+//
+//    const getCartItemCount = () => {
+//        return cart.length; // Return the number of items in the cart
 //    };
 //
 //    return (
-//        <div className="product-container">
-//            <h2>Our Products</h2>
+//        <div>
+//            <h2>Available Products</h2>
 //            <input
 //                type="text"
 //                placeholder="Search for products..."
@@ -73,92 +83,52 @@
 //                onChange={(e) => setSearchQuery(e.target.value)}
 //                className="search-bar"
 //            />
-//            <div className="product-grid">
+//            <div className="product-list">
 //                {filteredProducts.map((product) => (
-//                    <div key={product.id} className="product-card">
-//                        <h3>{product.name}</h3>
-//                        <p>Price: ${product.price}</p>
-//                        <p>Stock: {product.stock}</p>
-//                        {product.images && (
-//                            <div className="carousel-container">
-//                                <Slider {...carouselSettings}>
-//                                    {product.images.map((image, index) => (
-//                                        <div key={index}>
-//                                            <img src={`http://localhost:5000/${image}`} alt={`Product Image ${index + 1}`} />
-//                                        </div>
-//                                    ))}
-//                                </Slider>
-//                            </div>
-//                        )}
-//                        {token && (
-//                            <button className="buy-button">Buy</button>
-//                        )}
+//                    <div key={product.id} className="product-box">
+//                        <img
+//                            src={`http://localhost:5000/${product.images?.[0]}`}
+//                            alt={product.name}
+//                            className="product-image"
+//                        />
+//                        <div className="product-info">
+//                            <h3 className="product-name">{product.name}</h3>
+//                            <p className="product-price">Price: ${product.price}</p>
+//                            <p className="product-stock">Stock: {product.stock}</p>
+//                            <button
+//                                className="buy-button"
+//                                onClick={() => handleBuyClick(product.id)}
+//                            >
+//                                Buy
+//                            </button>
+//                        </div>
 //                    </div>
 //                ))}
 //            </div>
-//
-//            {token && (
-//                <div className="sell-product-container">
-//                    <h3>Sell a Product</h3>
-//                    <form onSubmit={handleCreateProduct}>
-//                        <div>
-//                            <label>Name</label>
-//                            <input
-//                                type="text"
-//                                value={newProduct.name}
-//                                onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
-//                                required
-//                            />
-//                        </div>
-//                        <div>
-//                            <label>Price</label>
-//                            <input
-//                                type="number"
-//                                value={newProduct.price}
-//                                onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
-//                                required
-//                            />
-//                        </div>
-//                        <div>
-//                            <label>Stock</label>
-//                            <input
-//                                type="number"
-//                                value={newProduct.stock}
-//                                onChange={(e) => setNewProduct({ ...newProduct, stock: e.target.value })}
-//                                required
-//                            />
-//                        </div>
-//                        <div>
-//                            <label>Images (Max 3)</label>
-//                            <input
-//                                type="file"
-//                                multiple
-//                                accept="image/*"
-//                                onChange={handleFileChange}
-//                                max="3"
-//                            />
-//                        </div>
-//                        <button type="submit">Create Product</button>
-//                    </form>
-//                    {message && <p>{message}</p>}
-//                </div>
-//            )}
+//            <button onClick={handleGoToCart} className="cart-button">
+//                Go to Cart ({getCartItemCount()})
+//            </button>
 //        </div>
 //    );
 //};
 //
 //export default ProductList;
 
+
 import React, { useEffect, useState } from "react";
-import { getProducts } from "../api";
-import Slider from "react-slick";
+import { getProducts, updateProductStock } from "../api"; // Assuming you have an API to update stock
+import { useNavigate } from "react-router-dom"; // for navigation
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import "./ProductList.css";
 
 const ProductList = () => {
     const [products, setProducts] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
+    const [cart, setCart] = useState([]); // State for cart
+    const navigate = useNavigate(); // For navigation to cart page
 
+    // Fetch products and cart content
     useEffect(() => {
         const fetchProducts = async () => {
             try {
@@ -168,6 +138,11 @@ const ProductList = () => {
                 console.error("Error fetching products:", error);
             }
         };
+
+        // Load cart content from localStorage
+        const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
+        setCart(storedCart);
+
         fetchProducts();
     }, []);
 
@@ -175,12 +150,44 @@ const ProductList = () => {
         product.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    const carouselSettings = {
-        dots: true,
-        infinite: true,
-        speed: 500,
-        slidesToShow: 1,
-        slidesToScroll: 1,
+    const handleBuyClick = async (productId) => {
+        // Find the product that was clicked
+        const productToAdd = products.find((product) => product.id === productId);
+
+        // Check if stock is available
+        if (productToAdd.stock > 0) {
+            // Decrease the stock locally
+            const updatedProduct = { ...productToAdd, stock: productToAdd.stock - 1 };
+
+            // Update the product in the state
+            const updatedProducts = products.map((product) =>
+                product.id === productId ? updatedProduct : product
+            );
+            setProducts(updatedProducts);
+
+            // Update the stock in the backend (make sure to implement this API)
+            try {
+                await updateProductStock(productId, updatedProduct.stock); // Assuming this API exists
+            } catch (error) {
+                console.error("Error updating stock:", error);
+            }
+
+            // Add the product to the cart
+            const cartFromStorage = JSON.parse(localStorage.getItem("cart")) || [];
+            cartFromStorage.push(productToAdd);
+            localStorage.setItem("cart", JSON.stringify(cartFromStorage));
+            setCart(cartFromStorage); // Update the cart state
+        } else {
+            alert("Sorry, this product is out of stock.");
+        }
+    };
+
+    const handleGoToCart = () => {
+        navigate("/cart"); // Navigate to the cart page
+    };
+
+    const getCartItemCount = () => {
+        return cart.length; // Return the number of items in the cart
     };
 
     return (
@@ -191,28 +198,33 @@ const ProductList = () => {
                 placeholder="Search for products..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                className="search-bar"
             />
-            <div className="product-grid">
+            <div className="product-list">
                 {filteredProducts.map((product) => (
-                    <div key={product.id} className="product-card">
-                        <h3>{product.name}</h3>
-                        <p>Price: ${product.price}</p>
-                        <p>Stock: {product.stock}</p>
-                        {product.images && (
-                            <Slider {...carouselSettings}>
-                                {product.images.map((image, index) => (
-                                    <div key={index}>
-                                        <img
-                                            src={`http://localhost:5000/${image}`}
-                                            alt={`Product ${index + 1}`}
-                                        />
-                                    </div>
-                                ))}
-                            </Slider>
-                        )}
+                    <div key={product.id} className="product-box">
+                        <img
+                            src={`http://localhost:5000/${product.images?.[0]}`}
+                            alt={product.name}
+                            className="product-image"
+                        />
+                        <div className="product-info">
+                            <h3 className="product-name">{product.name}</h3>
+                            <p className="product-price">Price: ${product.price}</p>
+                            <p className="product-stock">Stock: {product.stock}</p>
+                            <button
+                                className="buy-button"
+                                onClick={() => handleBuyClick(product.id)}
+                            >
+                                Buy
+                            </button>
+                        </div>
                     </div>
                 ))}
             </div>
+            <button onClick={handleGoToCart} className="cart-button">
+                Go to Cart ({getCartItemCount()})
+            </button>
         </div>
     );
 };

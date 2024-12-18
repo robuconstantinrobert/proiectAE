@@ -11,7 +11,7 @@ const getAuthHeaders = () => {
 export const getProducts = async () => {
     try {
         const response = await axios.get(`${API_BASE_URL}/products`, {
-            headers: getAuthHeaders(),
+            //headers: getAuthHeaders(),
         });
         return response.data;
     } catch (error) {
@@ -23,7 +23,7 @@ export const getProducts = async () => {
 export const createProduct = async (product) => {
     try {
         await axios.post(`${API_BASE_URL}/products`, product, {
-            headers: getAuthHeaders(),
+            //headers: getAuthHeaders(),
         });
     } catch (error) {
         console.error("Error creating product:", error);
@@ -32,13 +32,34 @@ export const createProduct = async (product) => {
 
 export const getOrders = async () => {
     const response = await axios.get(`${API_BASE_URL}/orders`, {
-        headers: getAuthHeaders(),
+        //headers: getAuthHeaders(),
     });
     return response.data;
 };
 
 export const createOrder = async (order) => {
     await axios.post(`${API_BASE_URL}/orders`, order, {
-        headers: getAuthHeaders(),
+        //headers: getAuthHeaders(),
     });
 };
+
+
+export const updateProductStock = async (productId, newStock) => {
+    try {
+        const response = await fetch(`http://localhost:5000/api/products/${productId}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ stock: newStock }),
+        });
+        if (!response.ok) {
+            throw new Error("Failed to update stock");
+        }
+        return await response.json();
+    } catch (error) {
+        console.error("Error updating stock:", error);
+        throw error;
+    }
+};
+
