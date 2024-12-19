@@ -1,21 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import './Cart.css'; // If using a separate CSS file for the cart
+import './Cart.css';
 
 const Cart = () => {
     const [cart, setCart] = useState(JSON.parse(localStorage.getItem("cart")) || []);
-    const [totalPrice, setTotalPrice] = useState(0); // To hold the total price in USD
+    const [totalPrice, setTotalPrice] = useState(0);
     const history = useNavigate();
 
-    // Calculate the total price in USD
     useEffect(() => {
         const total = cart.reduce((acc, product) => acc + product.price, 0);
-        setTotalPrice(total); // USD is the only currency used
+        setTotalPrice(total);
     }, [cart]);
 
     const handleCheckout = () => {
         const orderData = {
-            user_id: 1, // This should be dynamically set based on logged-in user
+            user_id: 1,
             products: cart.map((product) => ({
                 product_id: product.id,
                 quantity: 1,
@@ -34,16 +33,37 @@ const Cart = () => {
             .then((response) => response.json())
             .then((data) => {
                 console.log(data);
-                setCart([]); // Clear cart after successful checkout
-                localStorage.removeItem("cart"); // Clear cart from localStorage
-                history.push("/"); // Redirect to homepage
+                setCart([]);
+                localStorage.removeItem("cart");
+                history.push("/");
             })
             .catch((error) => console.error("Error during checkout:", error));
     };
 
-    const handleClearCart = () => {
-        setCart([]); // Clear cart from state
-        localStorage.removeItem("cart"); // Clear cart from localStorage
+    const handleClearCart = async () => {
+        try {
+            const orderId = localStorage.getItem("orderId");
+            const response = await fetch(`http://localhost:5000/orders/${orderId}`, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+
+            if (response.ok) {
+                console.log("Order deleted successfully.");
+            } else {
+                console.error("Error deleting order:", response);
+                alert("Error deleting order.");
+            }
+        } catch (error) {
+            console.error("Error deleting order:", error);
+            alert("There was an error deleting the order. Please try again.");
+        }
+
+        setCart([]);
+        localStorage.removeItem("cart");
+        localStorage.removeItem("orderId");
     };
 
     return (
@@ -56,7 +76,7 @@ const Cart = () => {
                     {cart.map((product) => (
                         <div key={product.id} className="cart-item">
                             <img
-                                src={`http://localhost:5000/${product.images?.[0]}`} // Assuming the product has an 'images' array with a URL
+                                src={`http://localhost:5000/${product.images?.[0]}`}
                                 alt={product.name}
                                 className="cart-item-image"
                             />

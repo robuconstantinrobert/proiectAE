@@ -38,9 +38,14 @@ export const getOrders = async () => {
 };
 
 export const createOrder = async (order) => {
-    await axios.post(`${API_BASE_URL}/orders`, order, {
+    try{
+        await axios.post(`${API_BASE_URL}/orders`, order, {
         //headers: getAuthHeaders(),
-    });
+        });
+    }catch (error) {
+        console.error("Error creating the order: ". error)
+    }
+
 };
 
 

@@ -9,3 +9,7 @@ class Order(db.Model):
     # Relationships
     user = db.relationship("User", back_populates="orders")
     order_items = db.relationship('OrderItem', back_populates='order', cascade="all, delete-orphan")
+
+    def __init__(self, user_id, total_price):
+        self.user_id = user_id
+        self.total_price = total_price
