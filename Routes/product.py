@@ -2,25 +2,11 @@ from flask import Blueprint, request, jsonify
 from Models.product import Product
 from Models.product_image import ProductImage
 from database import db
-from flask_jwt_extended import jwt_required
-from werkzeug.utils import secure_filename
-from flask_cors import cross_origin
 
 products = Blueprint("products", __name__)
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 UPLOAD_FOLDER = 'uploads/products'
-
-# @products.route("/", methods=["GET"])
-# @cross_origin(origins=["http://localhost:3000"])
-# #@jwt_required()
-# def get_products():
-#     all_products = Product.query.all()
-#     result = [
-#         {"id": p.id, "name": p.name, "price": p.price, "stock": p.stock}
-#         for p in all_products
-#     ]
-#     return jsonify(result), 200
 
 @products.route("/", methods=["GET"])
 def get_products():
@@ -75,8 +61,6 @@ def create_product():
 
     db.session.commit()
     return jsonify({"message": "Product created", "product_id": new_product.id}), 201
-
-
 
 
 @products.route("/<int:product_id>", methods=["PUT"])
