@@ -14,7 +14,7 @@ CORS(app, origins=["http://localhost:3000"], allow_headers=["Authorization", "Co
 # Configurare aplicație
 app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://postgres:Robert44!!@localhost/ecommerce_db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["JWT_SECRET_KEY"] = "your-secret-key"
+app.config["JWT_SECRET_KEY"] = "0000"
 
 # Inițializare baze de date și JWT
 init_db(app)

@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from Models.product import Product
 from Models.product_image import ProductImage
 from database import db
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 products = Blueprint("products", __name__)
 
@@ -107,3 +108,14 @@ def buy_product(product_id):
     db.session.commit()
 
     return jsonify({"message": "Product bought successfully", "stock": product.stock}), 200
+
+
+@products.route("/test", methods=["GET"])
+@jwt_required()
+def test_endpoint():
+    current_user = get_jwt_identity()
+    return jsonify({
+        "message": "Test endpoint accessed successfully!",
+        "user": current_user
+    }), 200
+
