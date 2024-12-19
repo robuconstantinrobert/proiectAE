@@ -4,37 +4,14 @@ import './Cart.css'; // If using a separate CSS file for the cart
 
 const Cart = () => {
     const [cart, setCart] = useState(JSON.parse(localStorage.getItem("cart")) || []);
-    const [currency, setCurrency] = useState("USD"); // Default currency
-    const [exchangeRate, setExchangeRate] = useState(1); // Default exchange rate
-    const [totalPrice, setTotalPrice] = useState(0); // To hold the total price in selected currency
+    const [totalPrice, setTotalPrice] = useState(0); // To hold the total price in USD
     const history = useNavigate();
 
-    // Fetch exchange rate when currency changes
-    useEffect(() => {
-        const fetchExchangeRate = async () => {
-            const API_KEY = "YOUR_API_KEY"; // Replace with your actual API key
-            const url = `https://v6.exchangerate-api.com/v6/${API_KEY}/latest/USD`; // Example URL for ExchangeRate-API
-            try {
-                const response = await fetch(url);
-                const data = await response.json();
-                if (data.result === "success") {
-                    setExchangeRate(data.conversion_rates[currency]);
-                } else {
-                    console.error("Failed to fetch exchange rates");
-                }
-            } catch (error) {
-                console.error("Error fetching exchange rate:", error);
-            }
-        };
-
-        fetchExchangeRate();
-    }, [currency]);
-
-    // Calculate the total price in the selected currency
+    // Calculate the total price in USD
     useEffect(() => {
         const total = cart.reduce((acc, product) => acc + product.price, 0);
-        setTotalPrice(total * exchangeRate); // Convert the total price to the selected currency
-    }, [cart, exchangeRate]);
+        setTotalPrice(total); // USD is the only currency used
+    }, [cart]);
 
     const handleCheckout = () => {
         const orderData = {
@@ -47,7 +24,7 @@ const Cart = () => {
 
         history("/shipping");
 
-        fetch("/api/orders", {
+        fetch("http://localhost:5000/orders", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -85,27 +62,12 @@ const Cart = () => {
                             />
                             <div className="cart-item-details">
                                 <h3>{product.name}</h3>
-                                <p>Price: {currency} {product.price * exchangeRate}</p> {/* Display price in selected currency */}
+                                <p>Price: USD {product.price}</p> {/* Display price in USD */}
                             </div>
                         </div>
                     ))}
                     <div className="cart-total">
-                        <p>Total: {currency} {totalPrice.toFixed(2)}</p> {/* Display total price in selected currency */}
-                    </div>
-                    <div className="currency-selector">
-                        <label htmlFor="currency">Choose Currency:</label>
-                        <select
-                            id="currency"
-                            value={currency}
-                            onChange={(e) => setCurrency(e.target.value)}
-                        >
-                            <option value="USD">USD</option>
-                            <option value="EUR">EUR</option>
-                            <option value="GBP">GBP</option>
-                            <option value="INR">INR</option>
-                            <option value="JPY">JPY</option>
-                            {/* Add more currencies as needed */}
-                        </select>
+                        <p>Total: USD {totalPrice.toFixed(2)}</p> {/* Display total price in USD */}
                     </div>
                     <button onClick={handleCheckout} className="checkout-button">
                         Checkout
